@@ -1,5 +1,0 @@
-ocrmypdf --force-ocr samples/lasd-restraining-orders.pdf ocr-example/lasd-restraining-orders_ocr_basic.pdf
-
-ocrmypdf --oversample 550 --clean --force-ocr samples/lasd-restraining-orders.pdf ocr-example/lasd-restraining-orders_ocr_oversample_550.pdf
-
-ocrmypdf --oversample 550 --clean --force-ocr --tesseract-config ocr-example/tesseract.cfg samples/lasd-restraining-orders.pdf ocr-example/lasd-restraining-orders_ocr_pattern_550.pdf
