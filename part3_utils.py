@@ -1,5 +1,4 @@
 import base64
-import json
 import os
 
 import httpx
@@ -8,7 +7,29 @@ from pydantic import BaseModel
 
 def parse_page(
     prompt: str, image: bytes, schema=BaseModel, model="google/gemini-3-flash-preview"
-) -> BaseModel:
+) -> dict:
+    """Send a page image to a vision LLM and return structured data.
+
+    Uses the OpenRouter API to send a prompt and a page image to a
+    vision-capable model, requesting a response that conforms to the
+    provided Pydantic schema.
+
+    More info about the OpenRouter API here: https://openrouter.ai/docs/guides/features/structured-outputs
+
+    Args:
+        prompt: Instructions telling the model what to extract from the image.
+        image: Raw PNG bytes of the page to analyze.
+        schema: A Pydantic BaseModel subclass defining the expected response
+            structure. The model is constrained to return JSON matching this schema.
+        model: OpenRouter model identifier to use for the request.
+
+    Returns:
+        A dict matching the fields defined in ``schema``.
+
+    Raises:
+        ValueError: If the OPENROUTER_API_KEY environment variable is not set.
+        httpx.HTTPStatusError: If the API returns a non-2xx response.
+    """
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         raise ValueError("Set OPENROUTER_API_KEY before calling parse_schedule_a_page")
@@ -51,5 +72,5 @@ def parse_page(
     response.raise_for_status()
 
     data = response.json()
-    content = json.loads(data["choices"][0]["message"]["content"])
-    return schema.model_validate(content)
+    content = data["choices"][0]["message"]["content"]
+    return schema.model_validate_json(content).model_dump()
